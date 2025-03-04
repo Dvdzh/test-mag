@@ -1,0 +1,22 @@
+# Data manipulation et analyse
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Jupyter
+jupyter>=1.0.0
+
+# Base de données
+sqlalchemy>=2.0.0
+
+# Visualisation et Dashboard
+dash>=2.14.0
+dash-core-components>=2.0.0
+dash-html-components>=2.0.0
+dash-table>=5.0.0
+plotly>=5.18.0
+
+# Tests
+pytest>=7.0.0
+
+# IPython (pour l'affichage dans Jupyter)
+ipython>=8.0.0

@@ -51,3 +51,6 @@ build/
 # Fichiers d'environnement
 .env
 .env.* 
+
+**.__MACOSX
+**.csv
