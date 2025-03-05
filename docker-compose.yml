@@ -1,0 +1,11 @@
+version: '3'
+services:
+  dash-app:
+    build:
+      context: .
+        platforms:
+          - linux/amd64
+          - linux/arm64  # pour macOS
+    ports:
+      - "3000:8050"
+      - "3001:8060"
