@@ -22,7 +22,7 @@ def create_layout(df_table,
                   df_monthly_bar,
                   node_list,
                   start_date = '2024-01-01',
-                  end_date = '2024-06-01'):
+                  end_date = '2024-02-01'):
 
 
     # random dataframe
@@ -50,54 +50,77 @@ def create_layout(df_table,
             ),
             html.Div(
                 [
-                    html.Div([
-                        dcc.DatePickerRange(
-                            id='date-picker-range',
-                            start_date=start_date,
-                            end_date=end_date,
-                            style={
-                                'backgroundColor': '#ffffff',
-                                'border': '1px solid #e2e8f0',
-                                'borderRadius': '6px',
-                            }
-                        ),
-                    ], style={
-                        'flex': '1',
-                        'display': 'flex',
-                        'justifyContent': 'flex-start',
-                    }),
-                    html.Div([
-                        html.Button(
-                            'Refresh',
-                            id='refresh-button',
-                            n_clicks=0,
-                            style={
-                                'padding': '8px 16px',
-                                'backgroundColor': '#3498db',
-                                'color': 'white',
-                                'border': 'none',
-                                'borderRadius': '6px',
-                                'cursor': 'pointer',
-                                'transition': 'background-color 0.3s ease',
-                                'fontSize': '14px',
-                                'fontWeight': '500',
-                                ':hover': {
-                                    'backgroundColor': '#2980b9'
-                                }
-                            }
-                        ),
-                    ], style={
-                        'flex': '1',
-                        'display': 'flex',
-                        'justifyContent': 'flex-end',
-                    }),
+                    dcc.DatePickerRange(
+                        id='date-picker-range',
+                        start_date=start_date,
+                        end_date=end_date,
+                        style={
+                            'backgroundColor': '#ffffff',
+                            'border': '1px solid #e2e8f0',
+                            'borderRadius': '6px',
+                            'fontSize': '14px',
+                            'zIndex': '100',
+                        },
+                        calendar_orientation='horizontal',
+                        display_format='YYYY-MM-DD',
+                        month_format='MMMM YYYY',
+                        clearable=True,
+                        with_portal=True,
+                        updatemode='bothdates',
+                        start_date_placeholder_text='Start Date',
+                        end_date_placeholder_text='End Date',
+                    ),
+                    dcc.Dropdown(
+                        id='limit-dropdown',
+                        options=[
+                            {'label': '10 résultats', 'value': 10},
+                            {'label': '20 résultats', 'value': 20},
+                            {'label': '50 résultats', 'value': 50}
+                        ],
+                        value=20,  # valeur par défaut
+                        style={
+                            'width': '150px',
+                            'marginLeft': '15px',
+                            'marginRight': '15px',
+                        },
+                        clearable=False,
+                    ),
+                    html.Button(
+                        [
+                            html.I(className="fas fa-sync-alt", style={'marginRight': '8px'}),
+                            'Refresh'
+                        ],
+                        id='refresh-button',
+                        n_clicks=0,
+                        style={
+                            'display': 'flex',
+                            'alignItems': 'center',
+                            'justifyContent': 'center',
+                            'padding': '10px 20px',
+                            'backgroundColor': '#3498db',
+                            'color': 'white',
+                            'border': 'none',
+                            'borderRadius': '8px',
+                            'cursor': 'pointer',
+                            'transition': 'all 0.3s ease',
+                            'fontSize': '14px',
+                            'fontWeight': '500',
+                            'boxShadow': '0 2px 4px rgba(52, 152, 219, 0.3)',
+                            'width': '120px',
+                            'height': '40px',
+                        }
+                    ),
                 ],
                 style={
                     'display': 'flex',
-                    'justifyContent': 'space-between',
-                    'padding': '15px',
+                    'alignItems': 'center',
+                    'padding': '15px 20px',
                     'borderBottom': '1px solid #eef2f7',
                     'width': '100%',
+                    'borderRadius': '8px',
+                    'marginBottom': '15px',
+                    'backgroundColor': '#ffffff',
+                    'boxShadow': '0 1px 3px rgba(0, 0, 0, 0.1)',
                 }
             ),
             dash_table.DataTable(
@@ -132,8 +155,16 @@ def create_layout(df_table,
                     {
                         'if': {'row_index': 'odd'},
                         'backgroundColor': '#f8fafc',
-                    }
+                    },
+                    {
+                        'if': {'state': 'selected'},
+                        'backgroundColor': '#e3f2fd',
+                        'border': '1px solid #2196f3',
+                    },
                 ],
+                row_selectable='multi',
+                selected_rows=[],
+                style_as_list_view=True,
             ),
         ],
         style={
@@ -219,39 +250,64 @@ def create_layout(df_table,
 
     search_div = html.Div(
         [
-            dcc.Dropdown(
-                id='search-dropdown-source',
-                options=[{'label': node, 'value': node} for node in node_list],
-                placeholder='Select a node',
-                clearable=True,
-                searchable=True,
-                value=node_list[4] if node_list else None,
+            # Premier div pour les contrôles de recherche
+            html.Div([
+                dcc.Dropdown(
+                    id='search-dropdown-source',
+                    options=[{'label': node, 'value': node} for node in node_list],
+                    placeholder='Select a node',
+                    clearable=True,
+                    searchable=True,
+                    value=node_list[4] if node_list else None,
+                    style={
+                        'width': '100%',
+                    }
+                ),
+                dcc.Dropdown(
+                    id='search-dropdown-sink',
+                    options=[{'label': node, 'value': node} for node in node_list],
+                    placeholder='Select a node',
+                    clearable=True,
+                    searchable=True,
+                    value=node_list[3] if len(node_list) > 1 else node_list[0] if node_list else None,
+                    style={
+                        'width': '100%',
+                    }
+                ),
+                html.Button(
+                    'Search',
+                    id='search-button',
+                    n_clicks=0,
+                    style={
+                        'height': '38px',
+                        'borderRadius': '4px',
+                        'border': '1px solid #ccc',
+                        'backgroundColor': '#ffffff',
+                        'cursor': 'pointer',
+                        'width': '100%',
+                    }
+                ),
+            ],
+            style={
+                'display': 'flex',
+                'flexDirection': 'row',
+                'justifyContent': 'center',
+                'alignItems': 'center',
+                'gap': '10px',
+                'marginBottom': '15px',
+            }),
+
+            # Nouveau div pour les boutons de chemins
+            html.Div(
+                id='path-buttons-container',
                 style={
-                    'width': '100%',
-                }
-            ),
-            dcc.Dropdown(
-                id='search-dropdown-sink',
-                options=[{'label': node, 'value': node} for node in node_list],
-                placeholder='Select a node',
-                clearable=True,
-                searchable=True,
-                value=node_list[3] if len(node_list) > 1 else node_list[0] if node_list else None,
-                style={
-                    'width': '100%',
-                }
-            ),
-            html.Button(
-                'Search',
-                id='search-button',
-                n_clicks=0,
-                style={
-                    'height': '38px',
-                    'borderRadius': '4px',
-                    'border': '1px solid #ccc',
-                    'backgroundColor': '#ffffff',
-                    'cursor': 'pointer',
-                    'width': '100%',
+                    'display': 'flex',
+                    'flexDirection': 'row',
+                    'flexWrap': 'wrap',
+                    'gap': '10px',
+                    'padding': '10px',
+                    'borderTop': '1px solid #eef2f7',
+                    'marginTop': '10px',
                 }
             ),
         ],
@@ -259,11 +315,10 @@ def create_layout(df_table,
             'margin': '20px',
             'padding': '15px',
             'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-            # horizontal layout
             'display': 'flex',
-            'flexDirection': 'row',
-            'justifyContent': 'center',
-            'alignItems': 'center',
+            'flexDirection': 'column',
+            'backgroundColor': 'white',
+            'borderRadius': '8px',
         }
     )
 
