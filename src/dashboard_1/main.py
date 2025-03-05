@@ -198,9 +198,10 @@ def handle_delete_button_click(n_clicks, figure, buttons):
     allow_duplicate=True
 )
 def update_graph_from_table(selected_rows, table_data, existing_figure, existing_buttons):
+    print(selected_rows)
     if not selected_rows:
         return dash.no_update, dash.no_update
-
+    
     ctx = dash.callback_context
     if not ctx.triggered:
         return dash.no_update, dash.no_update
@@ -208,8 +209,8 @@ def update_graph_from_table(selected_rows, table_data, existing_figure, existing
     # Récupérer la dernière ligne sélectionnée
     latest_selected = selected_rows[-1]
     row_data = table_data[latest_selected]
-    print("\n")
-    print(row_data)
+    # print("\n")
+    # print(row_data)
     # Extraire les nœuds source et destination
     source_node = row_data['Node1']
     sink_node = row_data['Node2']
@@ -359,7 +360,7 @@ def handle_path_button_click(n_clicks, figure, buttons):
 
     ctx = dash.callback_context
     if not ctx.triggered:
-        return dash.no_update
+        return dash.no_update, dash.no_update
 
     button_id = json.loads(ctx.triggered[0]['prop_id'].split('.')[0])
     clicked_index = button_id['index']
@@ -452,4 +453,4 @@ def handle_bar_click(click_data, figure, existing_figure):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)  
+    app.run_server(debug=True, host='0.0.0.0', port=8050)

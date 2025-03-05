@@ -40,7 +40,6 @@ def get_nodes_pair_congestion_table(start_date = '2024-01',
     get_nodes_congestion_monthly(start_date, end_date, conn, conn_memory)
 
     query = f'SELECT DISTINCT \
-            a.Date as Date, \
             a.Node as Node1, \
             b.Node as Node2, \
             a.Congestion - b.Congestion as Congestion \
@@ -53,6 +52,7 @@ def get_nodes_pair_congestion_table(start_date = '2024-01',
     df = pd.read_sql_query(query, conn_memory)
     df.to_sql('NODES_PAIR_CONGESTION', conn_memory, if_exists='replace', index=False)
 
+    print(df)
     return df
 
 def get_nodes_pair_congestion_monthly_bar(node_source, node_sink, conn = None, conn_memory = None):
