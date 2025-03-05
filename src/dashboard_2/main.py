@@ -99,5 +99,15 @@ def update_figure2(value):
     fig = query.get_constraing_figure_2(value)
     return [fig]
 
+# graph1-dropdown -> graph1
+@app.callback(
+    [Output('graph1', 'figure')],
+    [Input('graph1-dropdown', 'value')]
+)
+def update_figure3(values):
+    print(values)
+    fig = query.get_constraint_figure_3(values)
+    return [fig]
+
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8060)

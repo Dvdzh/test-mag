@@ -141,10 +141,10 @@ def create_layout(
                         dcc.Dropdown(
                             id='graph1-dropdown',
                             options=[
-                                {'label': 'Option 1', 'value': 'opt1'},
-                                {'label': 'Option 2', 'value': 'opt2'}
+                                {'label': 'MA', 'value': 'MA'},
+                                {'label': 'FG', 'value': 'FG'},
+                                {'label': 'MCE', 'value': 'MCE'}
                             ],
-                            value='opt1',
                             multi=True,
                             style={"marginBottom": "20px"}
                         ),

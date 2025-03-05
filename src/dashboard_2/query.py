@@ -122,3 +122,31 @@ def get_constraing_figure_2(ascending):
                     )
     
     return fig
+
+def get_constraint_figure_3(constraint_types):
+    print(constraint_types)
+    conn_memory = init_conn_memory()
+
+    query = f'SELECT * \
+            FROM BINDING_CONSTRAINTS_HOURLY \
+            WHERE '
+    query += ' or '.join([f'"Constraint Type" == "{constraint_type}"' for constraint_type in constraint_types])
+    query += ' ORDER BY "Shadow Price" DESC LIMIT 100'
+    df = pd.read_sql_query(query, conn_memory)
+    print(df)
+    
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=df['Shadow Price'],
+            y=df['Constraint Name'],
+            # bar width
+            width=5,
+        )
+    )
+
+    # hide y axis
+    fig.update_layout(yaxis_visible=False)
+
+    return fig
