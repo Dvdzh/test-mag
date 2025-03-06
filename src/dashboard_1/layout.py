@@ -167,7 +167,7 @@ def create_layout(df_table,
     
     # Pour le graphique journalier, prenons les données de la première paire
     # et affichons les données du premier mois disponible
-    print("\n", node_list)
+    # print("\n", node_list)
     source, sink = node_list[40], node_list[51]
     daily_data = query.get_nodes_pair_congestion_daily_bar(source, sink, "2024-06-01", "2024-06-30")
     fig_daily = go.Figure(

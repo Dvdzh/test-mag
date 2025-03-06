@@ -244,7 +244,7 @@ def handle_delete_button_click(n_clicks, figure, buttons):
     allow_duplicate=True
 )
 def update_graph_from_table(selected_rows, table_data, existing_figure, existing_buttons):
-    print(selected_rows)
+    # print(selected_rows)
     if not selected_rows:
         return dash.no_update, dash.no_update
     

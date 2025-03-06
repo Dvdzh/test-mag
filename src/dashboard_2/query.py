@@ -124,7 +124,7 @@ def get_constraing_figure_2(ascending):
     return fig
 
 def get_constraint_figure_3(constraint_types):
-    print(constraint_types)
+    # print(constraint_types)
 
     if constraint_types == []:
         return [go.Figure()]
@@ -137,7 +137,7 @@ def get_constraint_figure_3(constraint_types):
     query += ' or '.join([f'"Constraint Type" == "{constraint_type}"' for constraint_type in constraint_types])
     query += ' ORDER BY "Shadow Price" DESC LIMIT 100'
     df = pd.read_sql_query(query, conn_memory)
-    print(df)
+    # print(df)
     
     fig = go.Figure()
 
