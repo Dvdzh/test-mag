@@ -14,17 +14,17 @@ cd test-mag
 
 2. Créez un environnement virtuel (recommandé):
 ```bash
-python -m venv venv
+python -m venv .venv
 ```
 
 3. Activez l'environnement virtuel:
    - Sur Windows:
    ```bash
-   venv\Scripts\activate
+   .venv\Scripts\activate
    ```
    - Sur macOS/Linux:
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 4. Installez les dépendances:
