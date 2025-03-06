@@ -55,33 +55,15 @@ docker pull davidgpuless/dash-app
 
 2. Lancez le conteneur:
 ```bash
-docker run -p 8050:8050 davidgpuless/dash-app
+docker run -p 8050:8050 -p 8060:8060 davidgpuless/dash-app
 ```
 
 3. Accédez à l'application dans votre navigateur:
 ```
 http://localhost:8050
+http://localhost:8060
 ```
 
-### Options de configuration Docker
-
-Vous pouvez personnaliser le déploiement Docker avec ces options:
-
-- **Changer le port exposé**:
-```bash
-docker run -p 8080:8050 davidgpuless/dash-app
-```
-(L'application sera accessible sur http://localhost:8080)
-
-- **Exécution en arrière-plan**:
-```bash
-docker run -d -p 8050:8050 davidgpuless/dash-app
-```
-
-- **Montage des données locales**:
-```bash
-docker run -p 8050:8050 -v /chemin/local/vers/donnees:/app/data davidgpuless/dash-app
-```
 ---
 
 
