@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 from dash.dependencies import Input, Output, State
+import query
 
 TEMPLATE = 'plotly_white'
 
@@ -42,21 +43,23 @@ BUTTON_STYLE = {
 def create_layout(
         constraint_name_primaire
 ):
+    fig_1 = query.get_constraint_shadow_figure('SHARP_WR_WOLF_1', 'LN WOLF - SHARP_WRBASE')
+    fig_3 = query.get_constraint_figure_3(['MCE'])
+
+    
     return html.Div([
-        # En-tête avec navigation
+        # En-tête avec navigation (reprenant le style du dashboard 2)
         dbc.Row([
             dbc.Col(
                 html.Div([
                     dbc.Button("HOME", id="home-button", style=BUTTON_STYLE, className="mr-1"),
-                    dbc.Button("SECTION 1", id="section1-button", style=BUTTON_STYLE, className="mr-1"),
-                    dbc.Button("SECTION 2", id="section2-button", style=BUTTON_STYLE, className="mr-1"),
+                    dbc.Button("PATHS", id="section1-button", style=BUTTON_STYLE, className="mr-1"),
+                    dbc.Button("CONSTRAINTS", id="section2-button", style=BUTTON_STYLE, className="mr-1"),
                 ]), 
                 width=4
             ),
             dbc.Col(width=7),
-        ], justify='center', style={"padding": "2rem 0"}),
-        
-        html.Br(),
+        ], justify='center', style={"padding": "1rem 0 0.5rem 0"}),  # Réduction du padding
         
         # Contenu principal
         html.Div([
@@ -69,7 +72,7 @@ def create_layout(
             dbc.Row([
                 dbc.Col(
                     html.Div(
-                        "Données qui sont dans les tables BINDING_CONSTRAINTS_HOURLY, BINDING_CONSTRAINTS_DAILY ou BINDING_CONSTRAINTS_MONTHLY.",
+                        "Visualisation des contraintes du réseau.",
                         style=SUBTITLE_STYLE
                     ), 
                     width=9
@@ -78,7 +81,6 @@ def create_layout(
             ], justify='center'),
             
             html.Br(),
-            
             
             # Grand graphique principal
             dbc.Row([
@@ -100,16 +102,18 @@ def create_layout(
                         ),
                         # Dropdowns en ligne
                         dbc.Row([
-                            dbc.Col(
+                            dbc.Col([
+                                       
                                 dcc.Dropdown(
                                     id='main-graph-dropdown1',
                                     options=constraint_name_primaire,
-                                    value='global',
+                                    value='SHARP_WR_WOLF_1',
                                     style={"marginBottom": "20px"}
-                                ),
+                                )],
                                 width=6
                             ),
-                            dbc.Col(
+                            dbc.Col([
+                                
                                 dcc.Dropdown(
                                     id='main-graph-dropdown2',
                                     options=[
@@ -119,14 +123,15 @@ def create_layout(
                                     ],
                                     value='shadow_price',
                                     style={"marginBottom": "20px"}
-                                ),
+                                )],
                                 width=6
                             ),
                         ]),
                         dcc.Graph(
                             id='main-graph',
+                            figure=fig_1,
                             config={'displayModeBar': False},
-                            style={"height": "400px"}  # Hauteur fixe pour le grand graphique
+                            style={"height": "400px"}
                         )
                     ]),
                     width=12
@@ -138,6 +143,19 @@ def create_layout(
                 # Premier graphique
                 dbc.Col(
                     html.Div([
+                         html.Div(
+                                    "Répartition des contraintes par type",
+                                    style={
+                                        "fontSize": "1.2rem",
+                                        "color": "#2c3e50",
+                                        "fontWeight": "500",
+                                        "marginBottom": "20px",
+                                        "padding": "10px",
+                                        "backgroundColor": "#f8f9fa",
+                                        "borderRadius": "5px",
+                                        "borderLeft": "4px solid #3498db"
+                                    }
+                                ),
                         dcc.Dropdown(
                             id='graph1-dropdown',
                             options=[
@@ -146,12 +164,14 @@ def create_layout(
                                 {'label': 'MCE', 'value': 'MCE'}
                             ],
                             multi=True,
+                            value=['MCE'],
                             style={"marginBottom": "20px"}
                         ),
                         dcc.Graph(
                             id='graph1',
+                            figure=fig_3,
                             config={'displayModeBar': False},
-                            style={"height": "400px"}  # Hauteur fixe pour les petits graphiques
+                            style={"height": "400px"}
                         )
                     ]), 
                     width=6
@@ -159,6 +179,19 @@ def create_layout(
                 # Deuxième graphique
                 dbc.Col(
                     html.Div([
+                        html.Div(
+                                "Contraintes les plus actives (non nulles)",
+                                style={
+                                    "fontSize": "1.2rem",
+                                    "color": "#2c3e50",
+                                    "fontWeight": "500",
+                                    "marginBottom": "20px",
+                                    "padding": "10px",
+                                    "backgroundColor": "#f8f9fa",
+                                    "borderRadius": "5px",
+                                    "borderLeft": "4px solid #3498db"
+                                    }
+                                ),
                         dcc.Dropdown(
                             id='graph2-dropdown',
                             options=[

@@ -1,42 +1,37 @@
-/* src/app/assets/styles.css */
-
-/* Styles généraux */
-.main-container {
+body {
+    font-family: Helvetica, Arial, sans-serif;
     background-color: #f8f9fa;
-    min-height: 100vh;
-    padding: 20px;
+    color: #2c3e50;
 }
 
-/* En-tête */
-.header {
-    text-align: center;
-    padding: 20px;
-
+.dash-dropdown .Select-control {
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
 }
 
-/* Container des graphiques */
-.charts-container {
-    width: 90%;
-    margin: auto;
-    padding: 20px;
+.dash-dropdown .Select-menu-outer {
+    border-radius: 0 0 4px 4px;
 }
 
-/* Style pour chaque graphique */
-.chart-box {
-    width: 100%;
-    height: 300px;
-    background-color: white;
-    padding: 10px;
-    box-shadow: 0px 0px 5px lightgrey;
-    margin-bottom: 20px;
+.mr-1 {
+    margin-right: 0.25rem;
 }
 
-/* Zone des contrôles */
-.controls-container {
-    width: 100%;
-    background-color: white;
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+/* Styles pour les boutons */
+button.btn {
+    transition: all 0.3s ease;
 }
+
+button.btn:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les conteneurs avec bordure */
+.bordered-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+} 

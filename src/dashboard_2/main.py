@@ -29,20 +29,7 @@ app.index_string = '''
         <title>Dashboard Énergétique</title>
         {%favicon%}
         {%css%}
-        <style>
-            body {
-                font-family: Helvetica, Arial, sans-serif;
-                background-color: #f8f9fa;
-                color: #2c3e50;
-            }
-            .dash-dropdown .Select-control {
-                border-radius: 4px;
-                border: 1px solid #e0e0e0;
-            }
-            .dash-dropdown .Select-menu-outer {
-                border-radius: 0 0 4px 4px;
-            }
-        </style>
+        <link rel="stylesheet" href="/src/assets/styles.css">
     </head>
     <body>
         {%app_entry%}
@@ -105,7 +92,8 @@ def update_figure2(value):
     [Input('graph1-dropdown', 'value')]
 )
 def update_figure3(values):
-    print(values)
+    if values is None:
+        return [go.Figure()]
     fig = query.get_constraint_figure_3(values)
     return [fig]
 

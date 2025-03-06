@@ -1,21 +1,55 @@
 # src/app/layout.py
 from dash import html, dcc, dash_table
+import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 from dash.dependencies import Input, Output, State
+import query
 
+TEMPLATE = 'plotly_white'
 
-# x = np.linspace(0, 10, 100)
-# y = np.sin(x)
+# Définition des styles (repris du dashboard 2)
+CONTENT_STYLE = {
+    "margin-left": "2rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
 
-df = pd.DataFrame([
-    {'name': 'John', 'value': 10, 'description': 'Description 1', 'date': '2021-01-01'},
-    {'name': 'Jane', 'value': 20, 'description': 'Description 2', 'date': '2021-01-02'},
-    {'name': 'Jim', 'value': 30, 'description': 'Description 3', 'date': '2021-01-03'},
-    {'name': 'Jill', 'value': 40, 'description': 'Description 4', 'date': '2021-01-04'},
-    {'name': 'Jack', 'value': 50, 'description': 'Description 5', 'date': '2021-01-05'},
-])
+TITLE_STYLE = {
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-weight": "bold",
+    "font-size": "2.5rem",
+    "color": "#2c3e50",
+    "margin-bottom": "1rem"
+}
+
+SUBTITLE_STYLE = {
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-size": "1.2rem",
+    "color": "#7f8c8d",
+    "line-height": "1.5"
+}
+
+BUTTON_STYLE = {
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-weight": "600",
+    "margin-right": "10px",
+    "background-color": "#2c3e50",
+    "border": "none"
+}
+
+SECTION_HEADER_STYLE = {
+    "fontSize": "1.2rem",
+    "color": "#2c3e50",
+    "fontWeight": "500",
+    "marginBottom": "20px",
+    "padding": "10px",
+    "backgroundColor": "#f8f9fa",
+    "borderRadius": "5px",
+    "borderLeft": "4px solid #3498db"
+}
+
 
 def create_layout(df_table,
                   df_daily_bar,
@@ -24,329 +58,356 @@ def create_layout(df_table,
                   start_date = '2024-01-01',
                   end_date = '2024-02-01'):
 
-
-    # random dataframe
-    left_panel = html.Div(
-        [
-            html.Div(
-                [
-                    html.H1('Most Congested Paths',
-                        style={
-                            'fontSize': '24px',
-                            'fontWeight': '600',
-                            'color': '#2c3e50',
-                            'margin': '0',
-                            'padding': '20px 0',
-                        }
-                    ),
-                ],
-                style={
-                    'display': 'flex',
-                    'justifyContent': 'center',
-                    'alignItems': 'center',
-                    'width': '100%',
-                }
-            ),
-            html.Div(
-                [
-                    dcc.DatePickerRange(
-                        id='date-picker-range',
-                        start_date=start_date,
-                        end_date=end_date,
-                        style={
-                            'backgroundColor': '#ffffff',
-                            'border': '1px solid #e2e8f0',
-                            'borderRadius': '6px',
-                            'fontSize': '14px',
-                            'zIndex': '100',
-                        },
-                        calendar_orientation='horizontal',
-                        display_format='YYYY-MM-DD',
-                        month_format='MMMM YYYY',
-                        clearable=True,
-                        with_portal=True,
-                        updatemode='bothdates',
-                        start_date_placeholder_text='Start Date',
-                        end_date_placeholder_text='End Date',
-                    ),
-                    dcc.Dropdown(
-                        id='limit-dropdown',
-                        options=[
-                            {'label': '10 résultats', 'value': 10},
-                            {'label': '20 résultats', 'value': 20},
-                            {'label': '50 résultats', 'value': 50}
-                        ],
-                        value=20,  # valeur par défaut
-                        style={
-                            'width': '150px',
-                            'marginLeft': '15px',
-                            'marginRight': '15px',
-                        },
-                        clearable=False,
-                    ),
-                    html.Button(
-                        [
-                            html.I(className="fas fa-sync-alt", style={'marginRight': '8px'}),
-                            'Refresh'
-                        ],
-                        id='refresh-button',
-                        n_clicks=0,
-                        style={
-                            'display': 'flex',
-                            'alignItems': 'center',
-                            'justifyContent': 'center',
-                            'padding': '10px 20px',
-                            'backgroundColor': '#3498db',
-                            'color': 'white',
-                            'border': 'none',
-                            'borderRadius': '8px',
-                            'cursor': 'pointer',
-                            'transition': 'all 0.3s ease',
-                            'fontSize': '14px',
-                            'fontWeight': '500',
-                            'boxShadow': '0 2px 4px rgba(52, 152, 219, 0.3)',
-                            'width': '120px',
-                            'height': '40px',
-                        }
-                    ),
-                ],
-                style={
-                    'display': 'flex',
-                    'alignItems': 'center',
-                    'padding': '15px 20px',
-                    # 'borderBottom': '1px solid #eef2f7',
-                    'width': '100%',
-                    'borderRadius': '8px',
-                    'marginBottom': '15px',
-                    # 'backgroundColor': '#ffffff',
-                    # 'boxShadow': '0 1px 3px rgba(0, 0, 0, 0.1)',
-                }
-            ),
-            dash_table.DataTable(
-                id='left-panel-table',
-                columns=[
-                    {'name': col, 'id': col} for col in df_table.columns
-                ],
-                data=df_table.to_dict('records'),
-                style_table={
-                    'overflowX': 'auto',
-                },
-                style_header={
-                    'backgroundColor': '#f8fafc',
-                    'fontWeight': 'bold',
-                    'border': '1px solid #eef2f7',
-                    'textAlign': 'left',
-                    'padding': '12px 15px',
-                    'fontSize': '14px',
-                },
-                style_cell={
-                    'padding': '12px 15px',
-                    'textAlign': 'left',
-                    'fontFamily': 'system-ui, -apple-system, sans-serif',
-                    'fontSize': '13px',
-                    'border': '1px solid #eef2f7'
-                },
-                style_data={
-                    'backgroundColor': 'white',
-                    'color': '#2c3e50',
-                },
-                style_data_conditional=[
-                    {
-                        'if': {'row_index': 'odd'},
-                        'backgroundColor': '#f8fafc',
-                    },
-                    {
-                        'if': {'state': 'selected'},
-                        'backgroundColor': '#e3f2fd',
-                        'border': '1px solid #2196f3',
-                    },
-                ],
-                row_selectable='multi',
-                selected_rows=[],
-                style_as_list_view=True,
-                editable=True,
-            ),
-        ],
-        style={
-            'borderRadius': '8px',
-            'boxShadow': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            'display': 'flex',
-            'flexDirection': 'column',
-            'flex': '2',
-            'backgroundColor': 'white',
-            'overflow': 'hidden',
-            'border': '1px solid #eef2f7',
-            'margin': '10px',
-            'padding': '20px',
-        }
-    )
+    # Préparons les données initiales pour les graphiques
+    # Prenons les 3 premières paires de nœuds du tableau pour le graphique mensuel
+    top_pairs = df_table.head(3)
     
-    right_panel = html.Div(
-        [
-            # html.H1('Right Panel'),
-            html.Div(
-                [
-                # html.H1('Graph 1'),
-                dcc.Graph(
-                    id='right-panel-graph-1',
-                    figure=go.Figure(
-                        data=go.Bar(
-                            x=df_monthly_bar['Date'],
-                            y=df_monthly_bar['Congestion'],
-                            name='Congestion mensuelle'
-                        ),
-                        layout=go.Layout(
-                            xaxis_title='Date',
-                            yaxis_title='Congestion',
-                            autosize=True,
-                            margin=dict(l=50, r=50, t=50, b=50),
-                            clickmode='event+select',
-                        )
-                    ),
-                    config={'displayModeBar': True}
-                )
-            ],
-            style={
-                'width': '100%',
-                'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-            }
-            ),
-            html.Div(
-                [
-                    # html.H1('Graph 2'),
-                    dcc.Graph(id='right-panel-graph-2',
-                        figure=go.Figure(
-                            data=go.Bar(x=df_daily_bar['Date'], y=df_daily_bar['Congestion']),
-                                    layout=go.Layout(
-                                        xaxis_title='X',
-                                        yaxis_title='Y',
-                                        autosize=True,
-                                        margin=dict(l=50, r=50, t=50, b=50),
-                                    )),
-                        style={
-                        'width': '100%',
-                        'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-                    }
-                )
-            ],
-            style={
-                'width': '100%',
-                'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-            }
+    # Créons une figure initiale pour le graphique mensuel avec ces 3 paires
+    fig_monthly = go.Figure()
+    
+    # Couleurs pour les différentes paires
+    colors = ['rgb(55, 83, 109)', 'rgb(26, 118, 255)', 'rgb(220, 20, 60)']
+    
+    # Préparons les boutons initiaux
+    initial_buttons = []
+    
+    # Ajoutons les 3 premières paires au graphique mensuel
+    for i, row in enumerate(top_pairs.itertuples()):
+        # Récupérer les données mensuelles pour cette paire
+        monthly_data = query.get_nodes_pair_congestion_monthly_bar(row.Node1, row.Node2)
+        
+        # Conversion explicite des dates
+        monthly_data['Date'] = pd.to_datetime(monthly_data['Date'])
+        
+        # Ajoutons cette paire au graphique
+        fig_monthly.add_trace(
+            go.Bar(
+                name=f'{row.Node1} -> {row.Node2}',
+                x=monthly_data['Date'],
+                y=monthly_data['Congestion'],
+                marker_color=colors[i % len(colors)]
             )
-        ],
-        style={
-            # 'backgroundColor': 'red',
-            'padding': '10px',
-            'margin': '10px',
-            'borderRadius': '4px',
-            'width': '100%',
-            'display': 'flex',
-            'flex': '3',
-            'flexDirection': 'column',
-            'justifyContent': 'center',
-            'alignItems': 'center',
-        })
-
-    search_div = html.Div(
-        [
-            # Premier div pour les contrôles de recherche
-            html.Div([
-                dcc.Dropdown(
-                    id='search-dropdown-source',
-                    options=[{'label': node, 'value': node} for node in node_list],
-                    placeholder='Select a node',
-                    clearable=True,
-                    searchable=True,
-                    value=node_list[4] if node_list else None,
-                    style={
-                        'width': '100%',
-                    }
-                ),
-                dcc.Dropdown(
-                    id='search-dropdown-sink',
-                    options=[{'label': node, 'value': node} for node in node_list],
-                    placeholder='Select a node',
-                    clearable=True,
-                    searchable=True,
-                    value=node_list[3] if len(node_list) > 1 else node_list[0] if node_list else None,
-                    style={
-                        'width': '100%',
-                    }
-                ),
-                html.Button(
-                    'Search',
-                    id='search-button',
-                    n_clicks=0,
-                    style={
-                        'height': '38px',
-                        'borderRadius': '4px',
-                        'border': '1px solid #ccc',
-                        'backgroundColor': '#ffffff',
-                        'cursor': 'pointer',
-                        'width': '100%',
-                    }
-                ),
-            ],
-            style={
-                'display': 'flex',
-                'flexDirection': 'row',
-                'justifyContent': 'center',
-                'alignItems': 'center',
-                'gap': '10px',
-                'marginBottom': '15px',
-            }),
-
-            # Nouveau div pour les boutons de chemins
-            html.Div(
-                id='path-buttons-container',
+        )
+        
+        # Créons un bouton pour cette paire
+        button_container = html.Div([
+            # Bouton principal
+            html.Button(
+                f'{row.Node1} -> {row.Node2}',
+                id={'type': 'path-button', 'index': i},
                 style={
-                    'display': 'flex',
-                    'flexDirection': 'row',
-                    'flexWrap': 'wrap',
-                    'gap': '10px',
-                    'padding': '10px',
-                    'borderTop': '1px solid #eef2f7',
-                    'marginTop': '10px',
+                    'padding': '8px 16px',
+                    'backgroundColor': colors[i % len(colors)],
+                    'color': 'white',
+                    'border': 'none',
+                    'borderRadius': '6px 0 0 6px',  # Arrondi uniquement à gauche
+                    'cursor': 'pointer',
+                    'fontSize': '14px',
+                    'fontWeight': '500',
+                    'transition': 'opacity 0.3s ease',
+                    'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    'marginRight': '0',
                 }
             ),
-        ],
-        style={
-            'margin': '20px',
-            'padding': '15px',
-            'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-            'display': 'flex',
-            'flexDirection': 'column',
-            'backgroundColor': 'white',
-            'borderRadius': '8px',
-        }
-    )
-
-    bottom_panel = html.Div(
-        [
-            left_panel,
-            right_panel
-        ],
-        style={
-            'flex': 1,
+            # Bouton de suppression (croix)
+            html.Button(
+                '×',  # Symbole croix
+                id={'type': 'delete-button', 'index': i},
+                style={
+                    'padding': '8px 12px',
+                    'backgroundColor': colors[i % len(colors)],
+                    'color': 'white',
+                    'border': 'none',
+                    'borderRadius': '0 6px 6px 0',  # Arrondi uniquement à droite
+                    'cursor': 'pointer',
+                    'fontSize': '14px',
+                    'fontWeight': 'bold',
+                    'transition': 'opacity 0.3s ease',
+                    'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    'marginLeft': '1px',
+                    'opacity': '0.8',
+                }
+            )
+        ], style={
             'display': 'flex',
             'flexDirection': 'row',
-            'boxShadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-        }
+            'alignItems': 'center',
+        })
+        
+        initial_buttons.append(button_container)
+    
+    # Configuration du graphique mensuel
+    fig_monthly.update_layout(
+        barmode='group',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        xaxis=dict(
+            title='',
+            type='date',  # Spécifier le type d'axe comme date
+            tickformat='%b %Y',  # Format des dates (mois année)
+            tickangle=-45,  # Rotation des étiquettes
+            tickmode='auto',
+            nticks=12,  # Nombre de graduations souhaitées
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        yaxis=dict(
+            title='Congestion',
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        margin=dict(l=50, r=50, t=50, b=70),  # Marge inférieure augmentée pour les dates
+        plot_bgcolor='white',
+    )
+    
+    # Pour le graphique journalier, prenons les données de la première paire
+    # et affichons les données du premier mois disponible
+    print("\n", node_list)
+    source, sink = node_list[40], node_list[51]
+    daily_data = query.get_nodes_pair_congestion_daily_bar(source, sink, "2024-06-01", "2024-06-30")
+    fig_daily = go.Figure(
+        go.Bar(
+            x=daily_data['Date'],
+            y=daily_data['Congestion'],
+            marker_color=colors[0]
+        )
+    )
+    
+    mois = pd.to_datetime(start_date).strftime('%B')
+    fig_daily.update_layout(
+        xaxis=dict(
+            title='',
+            type='date',
+            tickformat='%d %b',  # Format jour mois
+            tickangle=-45,
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        yaxis=dict(
+            title='Congestion',
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        title=f'{source} -> {sink}, {mois}',
+        title_font_size=15,
+        # title position
+        title_x=0.5,
+        title_y=0.9,
+        margin=dict(l=50, r=50, t=40, b=70),
+        plot_bgcolor='white',
     )
 
     return html.Div([
-        search_div,
-        bottom_panel
-    ],
-    style={
-        'display': 'flex',
-        'flexDirection': 'column',
-        'height': '100vh',
-        }
-    )
-
-
+        # En-tête avec navigation (reprenant le style du dashboard 2)
+        dbc.Row([
+            dbc.Col(
+                html.Div([
+                    dbc.Button("HOME", id="home-button", style=BUTTON_STYLE, className="mr-1"),
+                    dbc.Button("PATHS", id="section1-button", style=BUTTON_STYLE, className="mr-1"),
+                    dbc.Button("CONSTRAINTS", id="section2-button", style=BUTTON_STYLE, className="mr-1"),
+                ]), 
+                width=4
+            ),
+            dbc.Col(width=7),
+        ], justify='center', style={"padding": "1rem 0 0.5rem 0"}),  # Réduction du padding
+        
+        # Contenu principal
+        html.Div([
+            # Titre et description
+            dbc.Row([
+                dbc.Col(html.H1("Congestion Dashboard", style=TITLE_STYLE), width=9),
+                dbc.Col(width=2),
+            ], justify='center'),
+            
+            dbc.Row([
+                dbc.Col(
+                    html.Div(
+                        "Visualisation des congestions entre les nœuds du réseau.",
+                        style=SUBTITLE_STYLE
+                    ), 
+                    width=9
+                ),
+                dbc.Col(width=2)
+            ], justify='center'),
+            
+            html.Br(),
+            
+            # Barre de recherche déplacée ici, entre le titre et les tableaux
+            dbc.Row([
+                dbc.Col(
+                    html.Div([
+                        html.Div("Recherche de congestion par paire de nœuds", style=SECTION_HEADER_STYLE),
+                        dbc.Row([
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='search-dropdown-source',
+                                    options=[{'label': node, 'value': node} for node in node_list],
+                                    placeholder="Source",
+                                    style={"marginBottom": "10px", "width": "100%"}
+                                ),
+                                width=5
+                            ),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='search-dropdown-sink',
+                                    options=[{'label': node, 'value': node} for node in node_list],
+                                    placeholder="Destination",
+                                    style={"marginBottom": "10px", "width": "100%"}
+                                ),
+                                width=5
+                            ),
+                            dbc.Col(
+                                dbc.Button(
+                                    "Search",
+                                    id="search-button",
+                                    style=BUTTON_STYLE,
+                                    className="mr-1"
+                                ),
+                                width=2
+                            )
+                        ]),
+                    ]),
+                    width=12
+                )
+            ], style={"marginBottom": "20px"}),
+            
+            # Conteneur pour les boutons de chemins actifs
+            dbc.Row([
+                dbc.Col(
+                    html.Div(
+                        id='path-buttons-container',
+                        children=initial_buttons,
+                        style={
+                            'display': 'flex',
+                            'flexWrap': 'wrap',
+                            'gap': '8px',
+                            'marginBottom': '20px'
+                        }
+                    ),
+                    width=12
+                )
+            ]),
+            
+            # Panneau de recherche et sélection
+            dbc.Row([
+                # Panneau de gauche (table)
+                dbc.Col(
+                    html.Div([
+                        html.Div("Top congestions par paires de nœuds", style=SECTION_HEADER_STYLE),
+                        dbc.Row([
+                            dbc.Col(
+                                dcc.DatePickerRange(
+                                    id='date-picker-range',
+                                    start_date='2024-09-01',
+                                    end_date='2024-09-30',
+                                    display_format='YYYY-MM-DD',
+                                    style={"marginBottom": "10px", "width": "100%"}
+                                ),
+                                width=8
+                            ),
+                            dbc.Col(
+                                dcc.Dropdown(
+                                    id='limit-dropdown',
+                                    options=[
+                                        {'label': '10', 'value': 10},
+                                        {'label': '20', 'value': 20},
+                                        {'label': '50', 'value': 50},
+                                        {'label': '100', 'value': 100}
+                                    ],
+                                    value=20,
+                                    style={"marginBottom": "10px", "width": "100%"}
+                                ),
+                                width=2
+                            ),
+                            dbc.Col(
+                                dbc.Button(
+                                    "Refresh",
+                                    id="refresh-button",
+                                    style=BUTTON_STYLE,
+                                    className="mr-1"
+                                ),
+                                width=2
+                            )
+                        ]),
+                        dash_table.DataTable(
+                            id='left-panel-table',
+                            columns=[
+                                {"name": "Source", "id": "Node1"},
+                                {"name": "Sink", "id": "Node2"},
+                                {"name": "Congestion", "id": "Congestion"}
+                            ],
+                            data=df_table.to_dict('records'),
+                            style_table={
+                                'height': '50hv',
+                                'overflowY': 'auto',
+                                'border': '1px solid #e0e0e0',
+                                'borderRadius': '5px'
+                            },
+                            style_header={
+                                'backgroundColor': '#2c3e50',
+                                'color': 'white',
+                                'fontWeight': 'bold',
+                                'textAlign': 'center'
+                            },
+                            style_cell={
+                                'padding': '10px',
+                                'textAlign': 'left',
+                                'fontFamily': 'Helvetica, Arial, sans-serif'
+                            },
+                            style_data_conditional=[
+                                {
+                                    'if': {'row_index': 'odd'},
+                                    'backgroundColor': '#f8f9fa'
+                                },
+                                {
+                                    'if': {'state': 'selected'},
+                                    'backgroundColor': '#3498db50',
+                                    'border': '1px solid #3498db'
+                                }
+                            ],
+                            row_selectable='multi'
+                        )
+                    ]),
+                    width=6
+                ),
+                
+                # Panneau de droite (graphiques)
+                dbc.Col(
+                    html.Div([
+                        # Graphique de congestion mensuelle
+                        html.Div([
+                            html.Div("Visualisation des congestions mensuelles et journalières", style=SECTION_HEADER_STYLE),
+                            dcc.Graph(
+                                id='right-panel-graph-1',
+                                figure=fig_monthly,
+                                config={'displayModeBar': False},
+                                style={"height": "450px"}
+                            )
+                        ]),
+                        
+                        # Graphique de congestion journalière
+                        html.Div([
+                            # html.Div("Congestion journalière (cliquer sur un mois ci-dessus)", style=SECTION_HEADER_STYLE),
+                            dcc.Graph(
+                                id='right-panel-graph-2',
+                                figure=fig_daily,
+                                config={'displayModeBar': False},
+                                style={"height": "450px"}
+                            )
+                        ])
+                    ]),
+                    width=6
+                )
+            ], justify='center'),
+            
+            html.Br(),
+        ], style=CONTENT_STYLE)
+    ])
 
 if __name__ == '__main__':
     simple_layout = create_layout(x, y, df)

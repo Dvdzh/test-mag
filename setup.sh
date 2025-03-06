@@ -15,6 +15,6 @@ fi
 
 $PYTHON src/setup.py
 $PYTHON src/process_data.py
-$PYTHON src/dashboard_1/main.py
+$PYTHON src/dashboard_1/main.py & $PYTHON src/dashboard_2/main.py
 
 echo "Configuration terminée."

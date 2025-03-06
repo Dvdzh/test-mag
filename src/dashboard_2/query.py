@@ -125,6 +125,10 @@ def get_constraing_figure_2(ascending):
 
 def get_constraint_figure_3(constraint_types):
     print(constraint_types)
+
+    if constraint_types == []:
+        return [go.Figure()]
+
     conn_memory = init_conn_memory()
 
     query = f'SELECT * \

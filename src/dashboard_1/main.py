@@ -1,24 +1,70 @@
 from dash import Dash, html, dcc, callback, Output, Input, State
-import dash 
+import dash
 import pandas as pd
 import sqlite3
 import numpy as np
 import json
 from dash.dependencies import ALL
-import time 
-
+import time
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from layout import create_layout
 # from query import get_nodes_pair_congestion_table, get_nodes_pair_congestion_daily_bar, get_nodes_pair_congestion_monthly_bar
 import query
 
-app = Dash(__name__)
+# Configuration du thème personnalisé (repris du dashboard 2)
+CUSTOM_THEME = dbc.themes.BOOTSTRAP
 
+app = Dash(
+    __name__,
+    external_stylesheets=[
+        CUSTOM_THEME,
+        "https://fonts.googleapis.com/css2?family=Helvetica:wght@400;600&display=swap"
+    ],
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, initial-scale=1"},
+        {"name": "description", "content": "Dashboard Congestion"}
+    ]
+)
+
+# Configuration des styles globaux (repris du dashboard 2)
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>Dashboard Congestion</title>
+        {%favicon%}
+        {%css%}
+        <link rel="stylesheet" href="/assets/styles.css">
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
+
+# Chargement des données initiales
 df_table = query.get_nodes_pair_congestion_table(start_date='2024-09-01', end_date='2024-09-30', limit=20)
 node_list = query.get_nodes_list()
 df_daily_bar = query.get_nodes_pair_congestion_daily_bar(start_date='2024-01-01', end_date='2024-01-31', node_source='AECC_CSWS', node_sink='AECC_CSWS')
 df_monthly_bar = query.get_nodes_pair_congestion_monthly_bar(node_source='AECC_CSWS', node_sink='AECC_CSWS')
 
+pair_list = [
+    ["BEP_M_TS_NPPD", "BEPM_TS_NPPD"],
+    ["CSWCOMANCHE1", "CSWSOUTHWESTERN2"],
+    ["CSWS.TNSK.GREENCNTY2", "CANADIAN_HILLS_2"],
+    ["OMPA_PONCATY_1_3", "CSWS.7CBY.7CBYWIND"],
+    ["AECC_FITZHUGH", "AECC_ELKINS"],
+    ["BRAZ", "CSWATTISON1"],
+    ["SEILKCPS.COMANCHE", "CANADIAN_HILLS_2"],
+    ["CSWS.TNSK.GREENCNTY2", "CSWKNXOLEES"]
+]
 app.layout = create_layout(df_table, df_daily_bar, df_monthly_bar, node_list)
 
 @app.callback(
@@ -223,6 +269,12 @@ def update_graph_from_table(selected_rows, table_data, existing_figure, existing
     else:
         fig = go.Figure(existing_figure)
 
+    fig.update_layout(
+        xaxis_title='Date',
+        yaxis_title='Congestion',
+        margin=dict(l=50, r=50, t=50, b=50),
+    )
+
     # Générer une couleur aléatoire
     color = f'rgb({np.random.randint(0,255)}, {np.random.randint(0,255)}, {np.random.randint(0,255)})'
     
@@ -301,45 +353,6 @@ def update_graph_from_table(selected_rows, table_data, existing_figure, existing
 
     return fig, buttons
 
-# # Callback pour gérer la suppression des boutons
-# @app.callback(
-#     [Output('right-panel-graph-1', 'figure', allow_duplicate=True),
-#      Output('path-buttons-container', 'children', allow_duplicate=True)],
-#     Input({'type': 'delete-button', 'index': ALL}, 'n_clicks'),
-#     State('right-panel-graph-1', 'figure'),
-#     State('path-buttons-container', 'children'),
-#     allow_duplicate=True,
-#     prevent_initial_call=True
-# )
-# def handle_delete_button_click(n_clicks, figure, buttons):
-#     if not any(n_clicks) or figure is None:
-#         return dash.no_update, dash.no_update
-
-#     ctx = dash.callback_context
-#     if not ctx.triggered:
-#         return dash.no_update, dash.no_update
-
-#     # Récupérer l'index du bouton cliqué
-#     print("\n")
-#     print(ctx.triggered[0]['prop_id'])  
-#     button_id = json.loads(ctx.triggered[0]['prop_id'].split('.')[0])
-#     clicked_index = button_id['index']
-
-#     # Créer une nouvelle figure sans la trace supprimée
-#     fig = go.Figure(figure)
-#     fig.data = tuple(trace for i, trace in enumerate(fig.data) if i != clicked_index)
-
-#     # Mettre à jour la liste des boutons
-#     updated_buttons = [button for i, button in enumerate(buttons) if i != clicked_index]
-
-#     # Mettre à jour les indices des boutons restants
-#     for i, button in enumerate(updated_buttons):
-#         print(button)
-#         button['props']['children'][0]['id']['index'] = i  # Mettre à jour l'index du bouton principal
-#         button['props']['children'][1]['id']['index'] = i  # Mettre à jour l'index du bouton de suppression
-
-#     return fig, updated_buttons
-
 # Callback pour gérer les clics sur les boutons
 @app.callback(
     [
@@ -377,7 +390,7 @@ def handle_path_button_click(n_clicks, figure, buttons):
         button['props']['children'][0]['id']['index'] = i  # Mettre à jour l'index du bouton principal
         button['props']['children'][1]['id']['index'] = i  # Mettre à jour l'index du bouton de suppression
 
-    print(buttons)
+    # print(buttons)
     return fig, buttons
 
 # update table from datepicker date
@@ -400,7 +413,7 @@ def update_table(start_date, end_date, limit, n_clicks):
     # print(df.tail())
     # print("finished")
     end_time = time.time()
-    print(f"Time taken: {end_time - start_time} seconds")
+    # print(f"Time taken: {end_time - start_time} seconds")
 
     return df.to_dict('records')
 
@@ -435,22 +448,39 @@ def handle_bar_click(click_data, figure, existing_figure):
     # print(df.tail())
 
     fig = go.Figure(go.Bar(x=df['Date'], y=df['Congestion'], marker_color=color))
+
+    fig.update_layout(
+        xaxis_title='Date',
+        yaxis_title='Congestion',
+        margin=dict(l=50, r=50, t=50, b=50),
+    )   
+
+    mois = start_date.strftime('%B')
+
+    # Configuration du graphique journalier
+    fig.update_layout(
+        xaxis=dict(
+            title='',
+            type='date',
+            tickformat='%d %b',  # Format jour mois
+            tickangle=-45,
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        yaxis=dict(
+            title='Congestion',
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        title=f'{source} -> {sink}, {mois}',
+        title_font_size=15,
+        # title position
+        title_x=0.5,
+        title_y=0.9,
+        margin=dict(l=50, r=50, t=40, b=70),
+        plot_bgcolor='white',
+    )
     return fig
-
-# # callback table each click on row add a new bar plot in right panel graph 1
-# @app.callback(
-#     Output('right-panel-graph-1', 'figure', allow_duplicate=True),
-#     Input('left-panel-table', 'selected_rows'),
-#     State('right-panel-graph-1', 'figure'),
-#     prevent_initial_call=True
-# )
-# def update_graph(selected_rows, figure):
-#     print(selected_rows)
-#     if selected_rows is None:
-#         return figure
-    
-#     return figure
-
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
